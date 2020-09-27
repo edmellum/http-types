@@ -3,7 +3,6 @@ use async_std::io::{self, Cursor};
 use serde::{de::DeserializeOwned, Serialize};
 
 use std::fmt::{self, Debug};
-use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -58,7 +57,7 @@ pin_project_lite::pin_project! {
         reader: Box<dyn BufRead + Unpin + Send + Sync + 'static>,
         mime: Mime,
         length: Option<usize>,
-        pub(crate) file_name: Option<PathBuf>,
+        pub(crate) file_name: Option<String>,
     }
 }
 
@@ -388,7 +387,7 @@ impl Body {
             mime,
             length: Some(len as usize),
             reader: Box::new(io::BufReader::new(file)),
-            file_name: Some(path.to_path_buf()),
+            file_name: Some(path.to_string_lossy().to_string()),
         })
     }
 
@@ -425,14 +424,14 @@ impl Body {
     }
 
     /// Get the file name of the `Body`, if it's set.
-    pub fn file_name(&self) -> Option<&PathBuf> {
-        self.file_name.as_ref()
+    pub fn file_name(&self) -> Option<&str> {
+        self.file_name.as_ref().map(|s| s.as_str())
     }
 
     /// Set the file name of the `Body`.
-    pub fn set_file_name<P>(&mut self, file_name: Option<P>)
+    pub fn set_file_name<S>(&mut self, file_name: Option<S>)
     where
-        P: AsRef<Path>,
+        S: AsRef<str>,
     {
         self.file_name = file_name.map(|v| v.as_ref().to_owned());
     }

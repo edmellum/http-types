@@ -1,7 +1,6 @@
 use crate::{bail, Body, Mime};
 
 use std::fmt::{self, Debug};
-use std::path::Path;
 
 /// A single multipart entry.
 ///
@@ -68,14 +67,14 @@ impl Entry {
     }
 
     /// Get the file name of the entry, if it's set.
-    pub fn file_name(&self) -> Option<&Path> {
-        self.body.file_name().map(|p| p.as_path())
+    pub fn file_name(&self) -> Option<&str> {
+        self.body.file_name()
     }
 
     /// Set the file name of the `Body`.
     pub fn set_file_name<P>(&mut self, file_name: Option<P>)
     where
-        P: AsRef<Path>,
+        P: AsRef<str>,
     {
         self.body.set_file_name(file_name);
     }
