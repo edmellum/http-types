@@ -4,11 +4,16 @@
 //!
 //! Request:
 //! ```
+//! use http_types::multipart::{Multipart, Entry};
+//!
 //! let mut req = Request::new(Method::Get, "http://example.website");
 //!
 //! let mut multi = Multipart::new();
-//! multi.push("hello world");
-//! multi.push(Body::from_file("./cats.jpeg").await?);
+//! multi.push(Entry::new("description", "hello world"));
+//!
+//! let mut entry = Entry::from_file("my_file", Body::from_file("./cats.jpeg").await?);
+//! entry.set_file_name("cats.jpeg");
+//! multi.push("myFile", Body::from_file("./cats.jpeg").await?);
 //!
 //! req.set_body(multi);
 //! ```
@@ -16,6 +21,7 @@
 //! Response:
 //!
 //! ```
+//! use http_types::multipart::{Multipart, Entry};
 //! let mut res = Response::new(200); // get this from somewhere
 //!
 //! let mut entries = res.body_multipart();
@@ -55,9 +61,11 @@ impl Multipart {
     }
 
     /// Add a new entry to the `Multipart` instance.
-    pub fn push(&mut self, name: impl AsRef<str>, body: impl Into<Body>) {
-        let entry = Entry::new(name, body);
-        self.entries.push(entry);
+    pub fn push<E>(&mut self, entry: E)
+    where
+        E: Into<Entry>,
+    {
+        self.entries.push(entry.into());
     }
 }
 

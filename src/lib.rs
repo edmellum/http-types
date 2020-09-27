@@ -136,10 +136,10 @@ mod status;
 mod status_code;
 mod version;
 
+pub mod multipart;
 pub mod trace;
 cfg_unstable! {
     pub mod upgrade;
-    pub mod multipart;
 }
 
 pub use body::Body;

@@ -3,7 +3,7 @@ use async_std::io::{self, Cursor};
 use serde::{de::DeserializeOwned, Serialize};
 
 use std::fmt::{self, Debug};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -422,6 +422,19 @@ impl Body {
     /// Sets the mime type of this Body.
     pub fn set_mime(&mut self, mime: impl Into<Mime>) {
         self.mime = mime.into();
+    }
+
+    /// Get the file name of the `Body`, if it's set.
+    pub fn file_name(&self) -> Option<&PathBuf> {
+        self.file_name.as_ref()
+    }
+
+    /// Set the file name of the `Body`.
+    pub fn set_file_name<P>(&mut self, file_name: Option<P>)
+    where
+        P: AsRef<Path>,
+    {
+        self.file_name = file_name.map(|v| v.as_ref().to_owned());
     }
 }
 
