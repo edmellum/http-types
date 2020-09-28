@@ -1,6 +1,7 @@
-use crate::{bail, Body, Mime};
+use crate::{Body, Mime};
 
 use std::fmt::{self, Debug};
+use std::path::Path;
 
 /// A single multipart entry.
 ///
@@ -12,7 +13,11 @@ pub struct Entry {
 
 impl Entry {
     /// Create a new `Entry`.
-    pub fn new(name: impl AsRef<str>, body: impl Into<Body>) -> Self {
+    pub fn new<S, B>(name: S, body: B) -> Self
+    where
+        S: AsRef<str>,
+        B: Into<Body>,
+    {
         Self {
             name: name.as_ref().to_owned(),
             body: body.into(),
@@ -20,25 +25,20 @@ impl Entry {
     }
 
     /// Create an empty `Entry`.
-    pub fn empty(name: impl AsRef<str>) -> Self {
-        Self {
-            name: name.as_ref().to_owned(),
-            body: Body::empty(),
-        }
+    pub fn empty<S>(name: S) -> Self
+    where
+        S: AsRef<str>,
+    {
+        Self::new(name, Body::empty())
     }
 
     /// Create an `Entry` from a file.
-    ///
     #[cfg(all(feature = "async_std", not(target_os = "unknown")))]
-    pub async fn from_file<P>(path: P) -> crate::Result<Self>
+    pub async fn from_file<S, P>(name: S, path: P) -> crate::Result<Self>
     where
-        P: AsRef<std::path::Path>,
+        S: AsRef<str>,
+        P: AsRef<Path>,
     {
-        let path = path.as_ref();
-        let name = match path.to_str() {
-            Some(p) => p.to_owned(),
-            None => bail!("Could not convert file name to unicode"),
-        };
         let body = Body::from_file(path).await?;
         Ok(Self::new(name, body))
     }
